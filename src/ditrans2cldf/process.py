@@ -667,6 +667,7 @@ def excel2cldf(excel_data, config):
         examples,
         set(itertools.chain(
             (ex for v in lvalues for ex in (v.get('Example_IDs') or ())),
+            (ex for v in constructions for ex in (v.get('Example_IDs') or ())),
             (ex for v in cvalues for ex in (v.get('Example_IDs') or ())))),
         'example')
 
@@ -771,6 +772,8 @@ def excel2cldf(excel_data, config):
 
     constructions = fix_foreign_keys(
         constructions, 'Language_ID', lang_id_map, 'constructions')
+    constructions = fix_foreign_keys(
+        constructions, 'Example_IDs', example_id_map, 'constructions')
     ccodes = fix_foreign_keys(
         ccodes, 'Parameter_ID', cparam_id_map, 'c-codes')
     cvalues = fix_foreign_keys(
