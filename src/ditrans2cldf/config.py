@@ -54,6 +54,7 @@ DEFAULT_CONFIG = {
             'Construction_ID': 'ID',
             'Construction_name': 'Name',
             'Construction_schema': 'Schema',
+            'Construction_examples::Example_ID': 'Example_IDs',
             'Construction_references::Reference_ID': 'Reference_ID',
             'Construction_references::Pages': 'Reference_Pages'},
         'cparameters': {

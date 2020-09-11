@@ -223,6 +223,22 @@ def drop_incomplete(table, required_columns, table_name=None):
     return new_table
 
 
+def drop_unused(table, used_ids, table_name=None):
+    old_size = len(table)
+    if old_size == len(used_ids):
+        return table
+
+    new_table = [
+        row for row in table
+        if row.get('ID') in used_ids]
+    if table_name:
+        print(
+            'dropped', old_size - len(new_table), 'out of', old_size,
+            table_name, "records because they aren't being referenced by anything",
+            file=sys.stderr)
+    return new_table
+
+
 def _split_field(pair, gloss_fields):
     k, v = pair
     if k not in gloss_fields:
@@ -628,18 +644,39 @@ def excel2cldf(excel_data, config):
     examples = drop_incomplete(
         examples, config['required_columns']['examples'], 'examples')
 
-    # Drop all unused languages
-    used_languages = set(itertools.chain(
-        (v['Language_ID'] for v in lvalues if v.get('Language_ID')),
-        (c['Language_ID'] for c in constructions if c.get('Language_ID')),
-        (e['Language_ID'] for e in examples if e.get('Language_ID'))))
-    old_size = len(languages)
-    languages = [l for l in languages if l.get('ID') in used_languages]
-    if len(languages) != old_size:
-        print(
-            'dropped', old_size - len(languages), 'out of', old_size,
-            "language records because they aren't being used anywhere",
-            file=sys.stderr)
+    used_lparams = {v['Parameter_ID'] for v in lvalues if v.get('Parameter_ID')}
+    lparams = drop_unused(
+        lparams,
+        used_lparams,
+        'language parameter')
+    lcodes = [c for c in lcodes if c.get('Parameter_ID') in used_lparams]
+
+    constructions = drop_unused(
+        constructions,
+        {v['Construction_ID'] for v in cvalues if v.get('Construction_ID')},
+        'construction')
+
+    used_cparams = {v['Parameter_ID'] for v in cvalues if v.get('Parameter_ID')}
+    cparams = drop_unused(
+        cparams,
+        used_cparams,
+        'construction parameter')
+    ccodes = [c for c in ccodes if c.get('Parameter_ID') in used_cparams]
+
+    examples = drop_unused(
+        examples,
+        set(itertools.chain(
+            (ex for v in lvalues for ex in (v.get('Example_IDs') or ())),
+            (ex for v in cvalues for ex in (v.get('Example_IDs') or ())))),
+        'example')
+
+    languages = drop_unused(
+        languages,
+        set(itertools.chain(
+            (v['Language_ID'] for v in lvalues if v.get('Language_ID')),
+            (c['Language_ID'] for c in constructions if c.get('Language_ID')),
+            (e['Language_ID'] for e in examples if e.get('Language_ID')))),
+        'language')
 
     languages = list(map(remove_invalid_iso_codes, languages))
 
@@ -702,18 +739,14 @@ def excel2cldf(excel_data, config):
         ValueIDMaker('Construction_ID', constr_id_map, cparam_id_map, 'cval'),
         cvalues)
 
-    citations = set(itertools.chain(
-        (cite for row in lvalues for cite in row.get('Reference_ID') or ()),
-        (cite for row in constructions for cite in row.get('Reference_ID') or ()),
-        (cite for row in cvalues for cite in row.get('Reference_ID') or ()),
-        (cite for row in examples for cite in row.get('Reference_ID') or ())))
-    old_size = len(references)
-    references = [row for row in references if row.get('ID') in citations]
-    if len(references) != old_size:
-        print(
-            'dropped', old_size - len(references), 'out of', old_size,
-            "references because they aren't being cited anywhere",
-            file=sys.stderr)
+    references = drop_unused(
+        references,
+        set(itertools.chain(
+            (cite for row in lvalues for cite in row.get('Reference_ID') or ()),
+            (cite for row in constructions for cite in row.get('Reference_ID') or ()),
+            (cite for row in cvalues for cite in row.get('Reference_ID') or ()),
+            (cite for row in examples for cite in row.get('Reference_ID') or ()))),
+        'reference')
 
     old_size = len(references)
     references, bibkey_map = add_bibkeys(references)

@@ -44,6 +44,12 @@ class DitransDBWriter(CLDFWriter):
             'http://cldf.clld.org/v1.0/terms.rdf#languageReference',
             'http://cldf.clld.org/v1.0/terms.rdf#name',
             'http://cldf.clld.org/v1.0/terms.rdf#description',
+            {
+                'datatype': {'base': 'string', 'format': '[a-zA-Z0-9_\\-]+'},
+                'propertyUrl': 'http://cldf.clld.org/v1.0/terms.rdf#exampleReference',
+                'separator': ';',
+                'name': 'Example_IDs',
+            },
             'http://cldf.clld.org/v1.0/terms.rdf#source')
         self.cldf['constructions.csv'].tableSchema.get_column('ID').required = True
         self.cldf['constructions.csv'].tableSchema.get_column('Language_ID').required = True
