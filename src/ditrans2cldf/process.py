@@ -645,31 +645,10 @@ def excel2cldf(excel_data, config):
         examples, config['required_columns']['examples'], 'examples')
 
     used_lparams = {v['Parameter_ID'] for v in lvalues if v.get('Parameter_ID')}
-    lparams = drop_unused(
-        lparams,
-        used_lparams,
-        'language parameter')
     lcodes = [c for c in lcodes if c.get('Parameter_ID') in used_lparams]
 
-    constructions = drop_unused(
-        constructions,
-        {v['Construction_ID'] for v in cvalues if v.get('Construction_ID')},
-        'construction')
-
     used_cparams = {v['Parameter_ID'] for v in cvalues if v.get('Parameter_ID')}
-    cparams = drop_unused(
-        cparams,
-        used_cparams,
-        'construction parameter')
     ccodes = [c for c in ccodes if c.get('Parameter_ID') in used_cparams]
-
-    examples = drop_unused(
-        examples,
-        set(itertools.chain(
-            (ex for v in lvalues for ex in (v.get('Example_IDs') or ())),
-            (ex for v in constructions for ex in (v.get('Example_IDs') or ())),
-            (ex for v in cvalues for ex in (v.get('Example_IDs') or ())))),
-        'example')
 
     languages = drop_unused(
         languages,
