@@ -605,7 +605,7 @@ def excel2cldf(excel_data, config):
     # merge array fields
     constructions = merge_array_rows(
         constructions, 'ID',
-        ['Example_IDs', 'Reference_ID', 'Reference_Pages'])
+        ['Example_IDs', 'Reference_ID', 'Reference_Pages', 'Meaning_ID'])
     # I know, those are not really primary keys, but the actual primary keys are
     # all empty...
     cvalues = merge_array_rows(
