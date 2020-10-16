@@ -598,6 +598,10 @@ def excel2cldf(excel_data, config):
         map_colnames(row, config['colname_maps']['examples'])
         for row in excel_data['Examples.xlsx']]
 
+    meanings = {
+        row['Meaning_ID']: (row['Meaning_name'], row.get('Typical_context'))
+        for row in excel_data['Meanings.xlsx']}
+
     references = [
         map_colnames(row, config['bibtex_map'])
         for row in excel_data['References.xlsx']]
@@ -605,7 +609,7 @@ def excel2cldf(excel_data, config):
     # merge array fields
     constructions = merge_array_rows(
         constructions, 'ID',
-        ['Example_IDs', 'Reference_ID', 'Reference_Pages', 'Meaning_ID'])
+        ['Example_IDs', 'Reference_ID', 'Reference_Pages'])
     # I know, those are not really primary keys, but the actual primary keys are
     # all empty...
     cvalues = merge_array_rows(
@@ -766,6 +770,25 @@ def excel2cldf(excel_data, config):
 
     examples = fix_foreign_keys(
         examples, 'Language_ID', lang_id_map, 'examples')
+
+    cparams.append({'ID': 'constr-meaning', 'Name': 'Meaning'})
+    def make_meaning_value(meanings, constr):
+        meaning_id = constr.get('Meaning_ID')
+        if not meaning_id or meaning_id not in meanings:
+            return None
+        value, typical_context = meanings[meaning_id]
+        return {
+            'ID': '{}-meaning'.format(constr['ID']),
+            'Construction_ID': constr['ID'],
+            'Parameter_ID': 'constr-meaning',
+            'Value': value,
+            'Comment': 'Typical context: {}'.format(typical_context)
+                if typical_context
+                else None}
+
+    cvalues.extend(filter(
+        None,
+        (make_meaning_value(meanings, c) for c in constructions)))
 
     # Tell tables about new bibkeys
 
