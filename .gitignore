@@ -5,3 +5,11 @@ __pycache__
 ditrans2cldf.egg-info
 .idea/
 
+# latex documentation
+*.aux
+*.dvi
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.out.ps
