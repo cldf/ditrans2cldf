@@ -514,7 +514,7 @@ class SourceFixer:
             self.missing[row_id].append(str(ref_id))
             return None
         elif pages:
-            return '{}[{}]'.format(bibkey, pages)
+            return '{}[{}]'.format(bibkey, pages.replace(';', ','))
         else:
             return bibkey
 
