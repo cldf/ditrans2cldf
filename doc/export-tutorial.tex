@@ -23,10 +23,15 @@
 
 \usepackage{booktabs}
 \usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
 
 \usepackage{hyperref}
 \hypersetup{%
   pdftitle=\Title,%
+  colorlinks=true,%
+  urlcolor=blue,%
+  linkcolor=black,%
   pdfauthor=Johannes Englisch,%
   pdfborderstyle={/S/U/W 0},%
 }
@@ -37,20 +42,52 @@
 \section{Introduction}%
 \label{sec:intro}
 
-Before data in a~Filemaker database can be converted into CLDF, we need to get
-it out of the actual database.
+Before data in a~Filemaker database can be converted into
+\href{https://cldf.clld.org}{CLDF}, we need to get it out of the actual
+database.
 Unfortunately there is no way to extract the data directly from the database
 file, so it is necessary to export the data into an intermediate file format.
 
-This document shows how to export all the views of the Filemaker database into
-a~batch of separate Excel files.
-These Excel files are then copied into the \emph{raw} folder of the
-\emph{cldfbench} project and the conversion scripts will create the actual CLDF
-from that.
-% TODO github link to one of the cldfbenches, once they're public
+The overall workflow looks as follows.
+The data is created and edited inside of Filemaker.
+Then the data is exported as a~batch of Excel files.
+The Excel files will be placed into the \emph{raw} folder of
+a~\href{https://github.com/cldf/cldfbench}{CLDFbench}
+project and converted into CLDF\@.
+After that the CLDF data is published on \href{https://zenodo.org/}{Zenodo} and
+can be read into a~web application or used for further processing.
 
-% Mention the fact that this only works for a particular small set of databases
-The Filemaker databases are organised in the following views:
+\begin{center}
+  \begin{tikzpicture}
+    [landmark/.style={rectangle,draw,minimum height=2em}]
+    \node (filemaker) [landmark] {Filemaker};
+    \node [right] at (filemaker.east) {\emph{\footnotesize{}data collection}};
+    \node (excel) [below=of filemaker] {Excel export};
+    \node (cldfbench) [landmark,below=of excel] {CLDFbench};
+    \node [right] at (cldfbench.east) {\emph{\footnotesize{}CLDF conversion}};
+    \node (cldf) [below=of cldfbench] {CLDF data};
+    \node (webapp) [landmark,below=of cldf] {Web application};
+    \node [below] at (webapp.south) {\emph{\footnotesize{}visualisation, browsablility}};
+    \node (zenodo) [landmark,right=of cldf] {Zenodo};
+    \node [below] at (zenodo.south) {\emph{\footnotesize{}citable version releases}};
+    \draw (filemaker) to (excel);
+    \draw[->] (excel) to (cldfbench);
+    \draw (cldfbench) to (cldf);
+    \draw[->] (cldf) to (zenodo);
+    \draw[->] (cldf) to (webapp);
+  \end{tikzpicture}
+\end{center}
+
+% TODO: links for an example once it's public
+% * github link to the cldfbench
+% * zenodo link
+% * github link to the webapp
+
+This document describes the exporting step from Filemaker to Excel.
+As mentioned above the files will be exported into multiple Excel files; one for
+each view.
+This workflow assumes that the Filemaker database is organised into the
+following views:
 
 \begin{itemize}
   \item \emph{Languages} (All languages in the database)
@@ -95,7 +132,7 @@ included in the spreadsheets for each view.
 
     \newpage
   \item
-    Also, the export does not include any data that is currently hiddin, so to
+    Also, the export does not include any data that is currently hidden, so to
     make sure \emph{all} data gets exported, click the \emph{Show All} button in
     the toolbar.\\[1ex]{}
     \framebox{\includegraphics[scale=.6]{tutorial-images/03-show-all.png}}
