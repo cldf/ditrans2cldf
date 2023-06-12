@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ditrans2cldf',
-    version='alpha1',
+    version='0.1a',
     description='',
     long_description='',
     classifiers=[
@@ -23,10 +23,9 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'cldfbench',
+        'cldfbench[glottolog]',
         'openpyxl',
         'pybtex',
-        'pyglottolog',
         'unidecode'],
     entry_points={
         'cldfbench.scaffold': [
