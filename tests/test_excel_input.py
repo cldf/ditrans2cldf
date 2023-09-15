@@ -56,6 +56,17 @@ class WorkbookConversion(unittest.TestCase):
         ]
         self.assertEqual(result, expected)
 
+    def test_only_one_row_in_the_table(self):
+        workbook = Workbook()
+        sheet = workbook.create_sheet()
+        sheet.append(['col1', 'col2', 'col3'])
+        sheet.append(['val1.1', 'val1.2', 'val1.3'])
+        result = excel_input.sheet_to_list(sheet)
+        expected = [
+            {'col1': 'val1.1', 'col2': 'val1.2', 'col3': 'val1.3'},
+        ]
+        self.assertEqual(result, expected)
+
 
 class CellNormalisation(unittest.TestCase):
 

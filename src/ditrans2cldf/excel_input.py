@@ -40,7 +40,12 @@ def sheet_to_list(worksheet):
     """
     column_names = [cell.value for cell in worksheet['1']]
     data = worksheet['2:{}'.format(worksheet.max_row)]
-    rows = [_dictionarise(column_names, row) for row in data]
+    if worksheet.max_row == 2:
+        # if you pass the range '2:2' into openpyxl it only returns a flat tuple
+        # of cells.
+        rows = [_dictionarise(column_names, data)]
+    else:
+        rows = [_dictionarise(column_names, row) for row in data]
     return [row for row in rows if row]
 
 
