@@ -17,7 +17,7 @@ def extract_table(original_table, primary_key, columns):
     `primary_key`.  Only columns set in `columns` will be included in the new
     table.
     """
-    new_table = collections.OrderedDict()
+    new_table = {}
     for orig_row in original_table:
         id_ = orig_row.get(primary_key)
         if not id_:
@@ -41,8 +41,7 @@ def map_colnames(row, name_map):
 def _add_code_numbers(code_table):
     numbers = collections.defaultdict(int)
     for row in code_table:
-        if 'Parameter_ID' in row:
-            param_id = row['Parameter_ID']
+        if (param_id := row.get('Parameter_ID')):
             numbers[param_id] += 1
             row = dict(row)
             row['Number'] = numbers[param_id]
@@ -195,7 +194,7 @@ class RowCompletenessEvaluator:
 
     def __init__(self, required_columns):
         self.required_columns = required_columns
-        self.missing = collections.OrderedDict()
+        self.missing = {}
 
     def is_complete(self, row):
         row_id = row.get('ID')
@@ -231,7 +230,7 @@ def drop_unused(table, used_ids, table_name=None):
     new_table = [
         row for row in table
         if row.get('ID') in used_ids]
-    if table_name:
+    if table_name and old_size - len(new_table) > 0:
         print(
             'dropped', old_size - len(new_table), 'out of', old_size,
             table_name, "records because they aren't being referenced by anything",
@@ -402,7 +401,7 @@ class ForeignKeyFixer:
     def __init__(self, key_column, foreign_id_map):
         self.key_column = key_column
         self.foreign_id_map = foreign_id_map
-        self.missing = collections.OrderedDict()
+        self.missing = {}
 
     def _fix_single_foreign_key_field(self, row_id, old_id):
         new_id = self.foreign_id_map.get(str(old_id))
@@ -420,15 +419,14 @@ class ForeignKeyFixer:
             return kv_pair
         elif isinstance(v, list):
             new_refs = [
-                self._fix_single_foreign_key_field(row_id, old_id)
-                for old_id in v]
-            return k, list(filter(None, new_refs))
+                new_id
+                for old_id in v
+                if (new_id := self._fix_single_foreign_key_field(row_id, old_id))]
+            return k, new_refs
+        elif (new_ref := self._fix_single_foreign_key_field(row_id, v)):
+            return k, new_ref
         else:
-            new_ref = self._fix_single_foreign_key_field(row_id, v)
-            if new_ref:
-                return k, new_ref
-            else:
-                return None
+            return None
 
     def _fix_row(self, row):
         new_kvpairs = [
@@ -462,8 +460,8 @@ def add_ids(id_maker, table):
         # XXX Check for collisions among old IDs?
         # Technically this should never happen, because FileMaker should keep
         # its own data valid, but you never know...
-        if row.get('ID'):
-            id_map[str(row['ID'])] = new_id
+        if (old_id := row.get('ID')):
+            id_map[str(old_id)] = new_id
         row['ID'] = new_id
     return id_map
 
@@ -504,7 +502,7 @@ class SourceFixer:
 
     def __init__(self, bibkey_map):
         self.bibkey_map = bibkey_map
-        self.missing = collections.OrderedDict()
+        self.missing = {}
 
     def _fix_single_source(self, row_id, ref_id, pages):
         bibkey = self.bibkey_map.get(str(ref_id))
@@ -627,40 +625,7 @@ def excel2cldf(excel_data, config):
     lvalues = [lparam_guesser.fixed_row(row) for row in lvalues]
     cvalues = fill_with_previous(cvalues, ['Parameter_ID', 'Code_ID', 'Value'])
 
-    # Satisfy UNIQUE constraint of clld's UnitValue table
-    cvalues = drop_duplicates(
-        cvalues,
-        ['Construction_ID', 'Parameter_ID', 'Code_ID', 'Value'])
-    cparam_guesser = ParameterGuesser(ccodes)
-    cvalues = [cparam_guesser.fixed_row(row) for row in cvalues]
-
-    # Drop row with missing required fields
-    lcodes = drop_incomplete(
-        lcodes, config['required_columns']['lcodes'], 'lcodes')
-    lvalues = drop_incomplete(
-        lvalues, config['required_columns']['lvalues'], 'lvalues')
-    constructions = drop_incomplete(
-        constructions, config['required_columns']['constructions'], 'constructions')
-    ccodes = drop_incomplete(
-        ccodes, config['required_columns']['ccodes'], 'ccodes')
-    cvalues = drop_incomplete(
-        cvalues, config['required_columns']['cvalues'], 'cvalues')
-    examples = drop_incomplete(
-        examples, config['required_columns']['examples'], 'examples')
-
-    used_lparams = {v['Parameter_ID'] for v in lvalues if v.get('Parameter_ID')}
-    lcodes = [c for c in lcodes if c.get('Parameter_ID') in used_lparams]
-
-    used_cparams = {v['Parameter_ID'] for v in cvalues if v.get('Parameter_ID')}
-    ccodes = [c for c in ccodes if c.get('Parameter_ID') in used_cparams]
-
-    languages = drop_unused(
-        languages,
-        set(itertools.chain(
-            (v['Language_ID'] for v in lvalues if v.get('Language_ID')),
-            (c['Language_ID'] for c in constructions if c.get('Language_ID')),
-            (e['Language_ID'] for e in examples if e.get('Language_ID')))),
-        'language')
+    # Process data
 
     languages = list(map(remove_invalid_iso_codes, languages))
 
@@ -697,40 +662,11 @@ def excel2cldf(excel_data, config):
             ' -- check your `~/.config/cldf/catalog.ini`.',
             file=sys.stderr)
 
-    # split glosses
-    examples = [
-        split_glosses(row, ('Gloss', 'Analyzed_Word'))
-        for row in examples]
-
-    # Add unique primary keys
-
     lang_id_map = add_ids(LanguageIDMaker('lang'), languages)
-    constr_id_map = add_ids(SequentialIDMaker('constr'), constructions)
-    example_id_map = add_ids(SequentialIDMaker('ex'), examples)
 
-    # For parameters and codes the languages and constructions end up in
-    # the same table, so make sure ids are unique across both
     lparam_id_map = add_ids(SequentialIDMaker('lparam'), lparams)
     cparam_id_map = add_ids(SequentialIDMaker('cparam'), cparams)
-
-    lcode_id_map = add_ids(CodeIDMaker(lparam_id_map, 'c'), lcodes)
-    ccode_id_map = add_ids(CodeIDMaker(cparam_id_map, 'c'), ccodes)
-
-    add_ids(
-        ValueIDMaker('Language_ID', lang_id_map, lparam_id_map, 'lval'),
-        lvalues)
-    add_ids(
-        ValueIDMaker('Construction_ID', constr_id_map, cparam_id_map, 'cval'),
-        cvalues)
-
-    references = drop_unused(
-        references,
-        set(itertools.chain(
-            (cite for row in lvalues for cite in row.get('Reference_ID') or ()),
-            (cite for row in constructions for cite in row.get('Reference_ID') or ()),
-            (cite for row in cvalues for cite in row.get('Reference_ID') or ()),
-            (cite for row in examples for cite in row.get('Reference_ID') or ()))),
-        'reference')
+    cparams.append({'ID': 'constr-meaning', 'Name': 'Meaning'})
 
     old_size = len(references)
     references, bibkey_map = add_bibkeys(references)
@@ -741,37 +677,56 @@ def excel2cldf(excel_data, config):
             'references for being potential duplicates',
             file=sys.stderr)
 
-    # Drop duplicates from code tables (and point id map to the original)
-    lcodes = drop_duplicates(lcodes, ['Parameter_ID', 'Name'], lcode_id_map)
-    ccodes = drop_duplicates(ccodes, ['Parameter_ID', 'Name'], ccode_id_map)
-
-    # Update foreign keys to new IDs
-
-    lcodes = fix_foreign_keys(lcodes, 'Parameter_ID', lparam_id_map, 'l-codes')
-    lvalues = fix_foreign_keys(lvalues, 'Language_ID', lang_id_map, 'l-values')
-    lvalues = fix_foreign_keys(lvalues, 'Parameter_ID', lparam_id_map, 'l-values')
-    lvalues = fix_foreign_keys(lvalues, 'Code_ID', lcode_id_map, 'l-values')
-    lvalues = fix_foreign_keys(lvalues, 'Example_IDs', example_id_map, 'l-values')
+    examples = fix_foreign_keys(
+        examples, 'Language_ID', lang_id_map, 'examples')
+    examples = fix_sources(examples, bibkey_map, 'examples')
+    examples = drop_incomplete(
+        examples, config['required_columns']['examples'], 'examples')
+    # split glosses
+    examples = [
+        split_glosses(row, ('Gloss', 'Analyzed_Word'))
+        for row in examples]
+    example_id_map = add_ids(SequentialIDMaker('ex'), examples)
 
     constructions = fix_foreign_keys(
         constructions, 'Language_ID', lang_id_map, 'constructions')
     constructions = fix_foreign_keys(
         constructions, 'Example_IDs', example_id_map, 'constructions')
-    ccodes = fix_foreign_keys(
-        ccodes, 'Parameter_ID', cparam_id_map, 'c-codes')
-    cvalues = fix_foreign_keys(
-        cvalues, 'Construction_ID', constr_id_map, 'c-codes')
-    cvalues = fix_foreign_keys(
-        cvalues, 'Parameter_ID', cparam_id_map, 'c-values')
-    cvalues = fix_foreign_keys(
-        cvalues, 'Code_ID', ccode_id_map, 'c-values')
-    cvalues = fix_foreign_keys(
-        cvalues, 'Example_IDs', example_id_map, 'c-values')
+    constructions = fix_sources(constructions, bibkey_map, 'constructions')
+    constructions = drop_incomplete(
+        constructions, config['required_columns']['constructions'], 'constructions')
+    constr_id_map = add_ids(SequentialIDMaker('constr'), constructions)
 
-    examples = fix_foreign_keys(
-        examples, 'Language_ID', lang_id_map, 'examples')
+    lcodes = fix_foreign_keys(lcodes, 'Parameter_ID', lparam_id_map, 'l-codes')
+    lcodes = drop_incomplete(
+        lcodes, config['required_columns']['lcodes'], 'lcodes')
+    lcode_id_map = add_ids(CodeIDMaker(lparam_id_map, 'c'), lcodes)
+    lcodes = drop_duplicates(lcodes, ['Parameter_ID', 'Name'], lcode_id_map)
 
-    cparams.append({'ID': 'constr-meaning', 'Name': 'Meaning'})
+    ccodes = fix_foreign_keys(ccodes, 'Parameter_ID', cparam_id_map, 'c-codes')
+    ccodes = drop_incomplete(
+        ccodes, config['required_columns']['ccodes'], 'ccodes')
+    ccode_id_map = add_ids(CodeIDMaker(cparam_id_map, 'c'), ccodes)
+    ccodes = drop_duplicates(ccodes, ['Parameter_ID', 'Name'], ccode_id_map)
+
+    lvalues = fix_foreign_keys(lvalues, 'Language_ID', lang_id_map, 'l-values')
+    lvalues = fix_foreign_keys(lvalues, 'Parameter_ID', lparam_id_map, 'l-values')
+    lvalues = fix_foreign_keys(lvalues, 'Code_ID', lcode_id_map, 'l-values')
+    lvalues = fix_foreign_keys(lvalues, 'Example_IDs', example_id_map, 'l-values')
+    lvalues = fix_sources(lvalues, bibkey_map, 'l-values')
+    lvalues = drop_incomplete(
+        lvalues, config['required_columns']['lvalues'], 'lvalues')
+    add_ids(
+        ValueIDMaker('Language_ID', lang_id_map, lparam_id_map, 'lval'),
+        lvalues)
+
+    # Satisfy UNIQUE constraint of clld's UnitValue table
+    cvalues = drop_duplicates(
+        cvalues,
+        ['Construction_ID', 'Parameter_ID', 'Code_ID', 'Value'])
+    cparam_guesser = ParameterGuesser(ccodes)
+    cvalues = [cparam_guesser.fixed_row(row) for row in cvalues]
+
     def make_meaning_value(meanings, constr):
         meaning_id = constr.get('Meaning_ID')
         if not meaning_id or meaning_id not in meanings:
@@ -782,20 +737,53 @@ def excel2cldf(excel_data, config):
             'Construction_ID': constr['ID'],
             'Parameter_ID': 'constr-meaning',
             'Value': value,
-            'Comment': 'Typical context: {}'.format(typical_context)
+            'Comment':
+                f'Typical context: {typical_context}'
                 if typical_context
                 else None}
 
-    cvalues.extend(filter(
-        None,
-        (make_meaning_value(meanings, c) for c in constructions)))
-
-    # Tell tables about new bibkeys
-
-    constructions = fix_sources(constructions, bibkey_map, 'constructions')
-    lvalues = fix_sources(lvalues, bibkey_map, 'l-values')
+    cvalues = fix_foreign_keys(
+        cvalues, 'Construction_ID', constr_id_map, 'c-codes')
+    cvalues = fix_foreign_keys(
+        cvalues, 'Parameter_ID', cparam_id_map, 'c-values')
+    cvalues = fix_foreign_keys(
+        cvalues, 'Code_ID', ccode_id_map, 'c-values')
+    cvalues = fix_foreign_keys(
+        cvalues, 'Example_IDs', example_id_map, 'c-values')
     cvalues = fix_sources(cvalues, bibkey_map, 'c-values')
-    examples = fix_sources(examples, bibkey_map, 'examples')
+    cvalues = drop_incomplete(
+        cvalues, config['required_columns']['cvalues'], 'cvalues')
+    cvalues.extend(
+        cvalue
+        for construction in constructions
+        if (cvalue := make_meaning_value(meanings, construction)))
+    add_ids(
+        ValueIDMaker('Construction_ID', constr_id_map, cparam_id_map, 'cval'),
+        cvalues)
+
+    # Drop unused rows
+
+    used_lparams = {v['Parameter_ID'] for v in lvalues if v.get('Parameter_ID')}
+    lcodes = [c for c in lcodes if c.get('Parameter_ID') in used_lparams]
+    used_cparams = {v['Parameter_ID'] for v in cvalues if v.get('Parameter_ID')}
+    ccodes = [c for c in ccodes if c.get('Parameter_ID') in used_cparams]
+
+    languages = drop_unused(
+        languages,
+        set(itertools.chain(
+            (v['Language_ID'] for v in lvalues if v.get('Language_ID')),
+            (c['Language_ID'] for c in constructions if c.get('Language_ID')),
+            (e['Language_ID'] for e in examples if e.get('Language_ID')))),
+        'language')
+
+    references = drop_unused(
+        references,
+        set(itertools.chain(
+            (cite for row in lvalues for cite in row.get('Source') or ()),
+            (cite for row in constructions for cite in row.get('Source') or ()),
+            (cite for row in cvalues for cite in row.get('Source') or ()),
+            (cite for row in examples for cite in row.get('Source') or ()))),
+        'reference')
 
     return {
         'languages': languages,
