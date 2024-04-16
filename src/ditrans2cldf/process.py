@@ -573,7 +573,7 @@ def excel2cldf(excel_data, config):
         map_colnames(row, config['colname_maps']['ccodes'])
         for row in ccodes]
     # keep the codes for the same parameter together for human-readability
-    ccodes.sort(key=lambda r: (r.get('Parameter_ID', ''), r.get('Name')))
+    ccodes.sort(key=lambda r: (r.get('Parameter_ID', ''), r.get('Name', '')))
     ccodes = add_code_numbers(ccodes)
 
     languages = [
