@@ -47,7 +47,7 @@ DEFAULT_CONFIG = {
             'Language_parameter_value_name_ID': 'Code_ID',
             'Language_data_examples::Example_ID': 'Example_IDs',
             'Language_data_references::Reference_ID': 'Reference_ID',
-            'Language_data_references::Pages': 'Reference_Pages',
+            'Language_data_references::Pages': 'Reference_pages',
             'Value_description': 'Description',
             'Language_parameter_value_names_of_Language_data::Value_name': 'Value'},
         'constructions': {
@@ -56,7 +56,7 @@ DEFAULT_CONFIG = {
             'Construction_schema': 'Schema',
             'Construction_examples::Example_ID': 'Example_IDs',
             'Construction_references::Reference_ID': 'Reference_ID',
-            'Construction_references::Pages': 'Reference_Pages',
+            'Construction_references::Pages': 'Reference_pages',
             'Construction_meanings::Meaning_ID': 'Meaning_ID'},
         'cparameters': {
             'Construction_parameter_ID': 'ID',
@@ -71,7 +71,7 @@ DEFAULT_CONFIG = {
             'Construction_parameter_value_name_ID': 'Code_ID',
             'Construction_data_examples::Example_ID': 'Example_IDs',
             'Construction_data_references::Reference_ID': 'Reference_ID',
-            'Construction_data_references::Pages': 'Reference_Pages',
+            'Construction_data_references::Pages': 'Reference_pages',
             'Value_description': 'Description',
             'Construction_parameter_value_names_of_Construction_data::Value_name': 'Value'},
         'examples': {

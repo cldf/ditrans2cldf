@@ -520,7 +520,7 @@ class SourceFixer:
         ref_ids = row.get('Reference_ID')
         if not ref_ids:
             return row
-        pages = row.get('Reference_Pages', ())
+        pages = row.get('Reference_pages', ())
         # sometimes there are more page numbers than ids...
         if len(pages) > len(ref_ids):
             pages = pages[:len(ref_ids)]
@@ -607,17 +607,17 @@ def excel2cldf(excel_data, config):
     # merge array fields
     constructions = merge_array_rows(
         constructions, 'ID',
-        ['Example_IDs', 'Reference_ID', 'Reference_Pages'])
+        ['Example_IDs', 'Reference_ID', 'Reference_pages'])
     # I know, those are not really primary keys, but the actual primary keys are
     # all empty...
     cvalues = merge_array_rows(
         cvalues, 'Construction_ID',
-        ['Example_IDs', 'Reference_ID', 'Reference_Pages'])
+        ['Example_IDs', 'Reference_ID', 'Reference_pages'])
     lvalues = merge_array_rows(
         lvalues, 'Language_ID',
-        ['Example_IDs', 'Reference_ID', 'Reference_Pages'])
+        ['Example_IDs', 'Reference_ID', 'Reference_pages'])
     examples = merge_array_rows(
-        examples, 'ID', ['Reference_ID', 'Reference_Pages'])
+        examples, 'ID', ['Reference_ID', 'Reference_pages'])
 
     # Fill in some missing fields
     lvalues = fill_with_previous(lvalues, ['Parameter_ID', 'Code_ID', 'Value'])
