@@ -776,13 +776,16 @@ def excel2cldf(excel_data, config):
             (e['Language_ID'] for e in examples if e.get('Language_ID')))),
         'language')
 
+    def remove_page(cite):
+        return re.sub(r'\[[^\]]*\]$', '', cite)
+
     references = drop_unused(
         references,
         set(itertools.chain(
-            (cite for row in lvalues for cite in row.get('Source') or ()),
-            (cite for row in constructions for cite in row.get('Source') or ()),
-            (cite for row in cvalues for cite in row.get('Source') or ()),
-            (cite for row in examples for cite in row.get('Source') or ()))),
+            (remove_page(cite) for row in lvalues for cite in row.get('Source') or ()),
+            (remove_page(cite) for row in constructions for cite in row.get('Source') or ()),
+            (remove_page(cite) for row in cvalues for cite in row.get('Source') or ()),
+            (remove_page(cite) for row in examples for cite in row.get('Source') or ()))),
         'reference')
 
     return {
