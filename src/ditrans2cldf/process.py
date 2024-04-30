@@ -596,10 +596,6 @@ def excel2cldf(excel_data, config):
         map_colnames(row, config['colname_maps']['examples'])
         for row in excel_data['Examples.xlsx']]
 
-    meanings = {
-        row['Meaning_ID']: (row['Meaning_name'], row.get('Typical_context'))
-        for row in excel_data['Meanings.xlsx']}
-
     references = [
         map_colnames(row, config['bibtex_map'])
         for row in excel_data['References.xlsx']]
@@ -666,7 +662,6 @@ def excel2cldf(excel_data, config):
 
     lparam_id_map = add_ids(SequentialIDMaker('lparam'), lparams)
     cparam_id_map = add_ids(SequentialIDMaker('cparam'), cparams)
-    cparams.append({'ID': 'constr-meaning', 'Name': 'Meaning'})
 
     old_size = len(references)
     references, bibkey_map = add_bibkeys(references)
@@ -727,21 +722,6 @@ def excel2cldf(excel_data, config):
     cparam_guesser = ParameterGuesser(ccodes)
     cvalues = [cparam_guesser.fixed_row(row) for row in cvalues]
 
-    def make_meaning_value(meanings, constr):
-        meaning_id = constr.get('Meaning_ID')
-        if not meaning_id or meaning_id not in meanings:
-            return None
-        value, typical_context = meanings[meaning_id]
-        return {
-            'ID': '{}-meaning'.format(constr['ID']),
-            'Construction_ID': constr['ID'],
-            'Parameter_ID': 'constr-meaning',
-            'Value': value,
-            'Comment':
-                f'Typical context: {typical_context}'
-                if typical_context
-                else None}
-
     cvalues = fix_foreign_keys(
         cvalues, 'Construction_ID', constr_id_map, 'c-codes')
     cvalues = fix_foreign_keys(
@@ -753,10 +733,6 @@ def excel2cldf(excel_data, config):
     cvalues = fix_sources(cvalues, bibkey_map, 'c-values')
     cvalues = drop_incomplete(
         cvalues, config['required_columns']['cvalues'], 'cvalues')
-    cvalues.extend(
-        cvalue
-        for construction in constructions
-        if (cvalue := make_meaning_value(meanings, construction)))
     add_ids(
         ValueIDMaker('Construction_ID', constr_id_map, cparam_id_map, 'cval'),
         cvalues)
