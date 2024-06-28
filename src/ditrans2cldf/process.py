@@ -255,6 +255,21 @@ def split_glosses(row, gloss_fields):
         for pair in row.items())
 
 
+def warn_about_misaligned_glosses(examples):
+    """Warn about misaligned glosses.
+
+    In this case misalignment means the number of analysed words and
+    the number of glosses are different."""
+    for example in examples:
+        word_count = len(example.get('Analyzed_Word') or ())
+        gloss_count = len(example.get('Gloss') or ())
+        if word_count != gloss_count:
+            print(
+                'examples:{}:'.format(example['ID']),
+                'Number of words different from number of glosses',
+                file=sys.stderr)
+
+
 class IDUniqueMaker:
     """Ensures uniqueness of ids."""
 
@@ -681,6 +696,9 @@ def excel2cldf(excel_data, config):
     examples = [
         split_glosses(row, ('Gloss', 'Analyzed_Word'))
         for row in examples]
+    # show warnings *before* IDs are rewritten, so they're still useful on the
+    # filemaker side
+    warn_about_misaligned_glosses(examples)
     example_id_map = add_ids(SequentialIDMaker('ex'), examples)
 
     constructions = fix_foreign_keys(
