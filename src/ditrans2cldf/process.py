@@ -563,10 +563,10 @@ def fix_sources(table, bibkey_map, table_name=None):
     return new_table
 
 
-def excel2cldf(excel_data, config):
+def make_cldf_tables(raw_data, config):
     # TODO Account for missing tables
     lcodes = extract_table(
-        excel_data['Language_data.xlsx'],
+        raw_data['Language_data'],
         'Language_parameter_value_name_ID',
         ['Language_parameter_value_names_of_Language_data::Value_name',
          'Language_parameter_ID'])
@@ -578,7 +578,7 @@ def excel2cldf(excel_data, config):
     lcodes = add_code_numbers(lcodes)
 
     ccodes = extract_table(
-        excel_data['Construction_data.xlsx'],
+        raw_data['Construction_data'],
         'Construction_parameter_value_name_ID',
         ['Construction_parameter_value_names_of_Construction_data::Value_name',
          'Construction_parameter_ID'])
@@ -591,29 +591,29 @@ def excel2cldf(excel_data, config):
 
     languages = [
         map_colnames(row, config['colname_maps']['languages'])
-        for row in excel_data['Languages.xlsx']]
+        for row in raw_data['Languages']]
     lparams = [
         map_colnames(row, config['colname_maps']['lparameters'])
-        for row in excel_data['Language_parameters.xlsx']]
+        for row in raw_data['Language_parameters']]
     lvalues = [
         map_colnames(row, config['colname_maps']['lvalues'])
-        for row in excel_data['Language_data.xlsx']]
+        for row in raw_data['Language_data']]
     constructions = [
         map_colnames(row, config['colname_maps']['constructions'])
-        for row in excel_data['Constructions.xlsx']]
+        for row in raw_data['Constructions']]
     cparams = [
         map_colnames(row, config['colname_maps']['cparameters'])
-        for row in excel_data['Construction_parameters.xlsx']]
+        for row in raw_data['Construction_parameters']]
     cvalues = [
         map_colnames(row, config['colname_maps']['cvalues'])
-        for row in excel_data['Construction_data.xlsx']]
+        for row in raw_data['Construction_data']]
     examples = [
         map_colnames(row, config['colname_maps']['examples'])
-        for row in excel_data['Examples.xlsx']]
+        for row in raw_data['Examples']]
 
     references = [
         map_colnames(row, config['bibtex_map'])
-        for row in excel_data['References.xlsx']]
+        for row in raw_data['References']]
 
     # merge array fields
     constructions = merge_array_rows(

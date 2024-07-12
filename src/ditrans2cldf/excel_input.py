@@ -1,6 +1,5 @@
-import os
 import re
-import glob
+from pathlib import Path
 
 from openpyxl import load_workbook
 
@@ -59,11 +58,11 @@ def load_excel_data(folder):  # pragma: nocover
     and that the first row of this sheet contains the column names.
     """
     data = {}
-    for filename in glob.iglob(os.path.join(str(folder), '*.xlsx')):
-        workbook = load_workbook(filename=filename)
+    for filename in Path(folder).glob('*.xlsx'):
+        workbook = load_workbook(filename=str(filename))
         if not workbook.sheetnames:
             continue
-        table_name = os.path.basename(filename)
+        table_name = filename.stem
         data[table_name] = sheet_to_list(workbook[workbook.sheetnames[0]])
     data = {
         table_name: list(map(normalise_whitespace, table))
