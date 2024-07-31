@@ -16,12 +16,11 @@ DEFAULT_CONFIG = {
         'CodeTable': [
             'ID', 'Parameter_ID', 'Name'],
         'ValueTable': [
-            'ID', 'Language_ID', 'Parameter_ID', 'Example_IDs', 'Description'],
+            'ID', 'Language_ID', 'Parameter_ID', 'Example_IDs'],
         'constructions.csv': [
             'ID', 'Language_ID', 'Name', 'Description', 'Schema'],
         'cvalues.csv': [
-            'ID', 'Construction_ID', 'Parameter_ID', 'Example_IDs',
-            'Description'],
+            'ID', 'Construction_ID', 'Parameter_ID', 'Example_IDs'],
         'ExampleTable': [
             'ID', 'Language_ID', 'Primary_Text', 'Original_Orthography',
             'Translated_Text', 'Translation_Other', 'Analyzed_Text', 'Gloss',
@@ -48,7 +47,7 @@ DEFAULT_CONFIG = {
             'Language_data_examples::Example_ID': 'Example_IDs',
             'Language_data_references::Reference_ID': 'Reference_ID',
             'Language_data_references::Pages': 'Reference_pages',
-            'Value_description': 'Description',
+            'Value_description': 'Comment',
             'Language_parameter_value_names_of_Language_data::Value_name': 'Value'},
         'constructions': {
             'Construction_ID': 'ID',
@@ -72,7 +71,7 @@ DEFAULT_CONFIG = {
             'Construction_data_examples::Example_ID': 'Example_IDs',
             'Construction_data_references::Reference_ID': 'Reference_ID',
             'Construction_data_references::Pages': 'Reference_pages',
-            'Value_description': 'Description',
+            'Value_description': 'Comment',
             'Construction_parameter_value_names_of_Construction_data::Value_name': 'Value'},
         'examples': {
             'Example_ID': 'ID',
