@@ -71,7 +71,8 @@ class DitransDBWriter(CLDFWriter):
                 'name': 'Example_IDs',
             },
             'http://cldf.clld.org/v1.0/terms.rdf#source',
-            'http://cldf.clld.org/v1.0/terms.rdf#value')
+            'http://cldf.clld.org/v1.0/terms.rdf#value',
+            'http://cldf.clld.org/v1.0/terms.rdf#comment')
         self.cldf['cvalues.csv'].tableSchema.get_column('ID').required = True
         self.cldf['cvalues.csv'].add_foreign_key('Construction_ID', 'constructions.csv', 'ID')
 
