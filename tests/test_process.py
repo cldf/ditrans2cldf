@@ -192,66 +192,80 @@ class FillEmptyFields(unittest.TestCase):
 
     def test_fill_fields_with_previous(self):
         table = [
-            {'ID': 'id1', 'Column1': 'val1'},
-            {'ID': 'id2'},
-            {'ID': 'id3', 'Column1': 'val3'}]
-        new_table = p.fill_with_previous(table, ['Column1'])
+            {'Breaker': '1', 'ID': 'id1', 'Column1': 'val1'},
+            {'Breaker': '1', 'ID': 'id2'},
+            {'Breaker': '3', 'ID': 'id3', 'Column1': 'val3'}]
+        new_table = p.fill_with_previous(table, ['Column1'], 'Breaker')
         expected = [
-            {'ID': 'id1', 'Column1': 'val1'},
-            {'ID': 'id2', 'Column1': 'val1'},
-            {'ID': 'id3', 'Column1': 'val3'}]
+            {'Breaker': '1', 'ID': 'id1', 'Column1': 'val1'},
+            {'Breaker': '1', 'ID': 'id2', 'Column1': 'val1'},
+            {'Breaker': '3', 'ID': 'id3', 'Column1': 'val3'}]
         self.assertEqual(new_table, expected)
 
     def test_cant_fill_first_row(self):
         table = [
-            {'ID': 'id1'},
-            {'ID': 'id2', 'Column1': 'val2'},
-            {'ID': 'id3', 'Column1': 'val3'}]
-        new_table = p.fill_with_previous(table, ['Column1'])
+            {'Breaker': '1', 'ID': 'id1'},
+            {'Breaker': '1', 'ID': 'id2', 'Column1': 'val2'},
+            {'Breaker': '3', 'ID': 'id3', 'Column1': 'val3'}]
+        new_table = p.fill_with_previous(table, ['Column1'], 'Breaker')
         expected = [
-            {'ID': 'id1'},
-            {'ID': 'id2', 'Column1': 'val2'},
-            {'ID': 'id3', 'Column1': 'val3'}]
+            {'Breaker': '1', 'ID': 'id1'},
+            {'Breaker': '1', 'ID': 'id2', 'Column1': 'val2'},
+            {'Breaker': '3', 'ID': 'id3', 'Column1': 'val3'}]
         self.assertEqual(new_table, expected)
 
     def test_keep_filling(self):
         table = [
-            {'ID': 'id1', 'Column1': 'val1'},
-            {'ID': 'id2'},
-            {'ID': 'id3'},
-            {'ID': 'id4', 'Column1': 'val4'}]
-        new_table = p.fill_with_previous(table, ['Column1'])
+            {'Breaker': '1' ,'ID': 'id1', 'Column1': 'val1'},
+            {'Breaker': '1' ,'ID': 'id2'},
+            {'Breaker': '1' ,'ID': 'id3'},
+            {'Breaker': '4' ,'ID': 'id4', 'Column1': 'val4'}]
+        new_table = p.fill_with_previous(table, ['Column1'], 'Breaker')
         expected = [
-            {'ID': 'id1', 'Column1': 'val1'},
-            {'ID': 'id2', 'Column1': 'val1'},
-            {'ID': 'id3', 'Column1': 'val1'},
-            {'ID': 'id4', 'Column1': 'val4'}]
+            {'Breaker': '1', 'ID': 'id1', 'Column1': 'val1'},
+            {'Breaker': '1', 'ID': 'id2', 'Column1': 'val1'},
+            {'Breaker': '1', 'ID': 'id3', 'Column1': 'val1'},
+            {'Breaker': '4', 'ID': 'id4', 'Column1': 'val4'}]
+        self.assertEqual(new_table, expected)
+
+    def test_stop_when_breaker_changes(self):
+        table = [
+            {'Breaker': '1' ,'ID': 'id1', 'Column1': 'val1'},
+            {'Breaker': '1' ,'ID': 'id2'},
+            {'Breaker': '3' ,'ID': 'id3'},
+            {'Breaker': '4' ,'ID': 'id4', 'Column1': 'val4'}]
+        new_table = p.fill_with_previous(table, ['Column1'], 'Breaker')
+        expected = [
+            {'Breaker': '1', 'ID': 'id1', 'Column1': 'val1'},
+            {'Breaker': '1', 'ID': 'id2', 'Column1': 'val1'},
+            {'Breaker': '3', 'ID': 'id3'},
+            {'Breaker': '4', 'ID': 'id4', 'Column1': 'val4'}]
         self.assertEqual(new_table, expected)
 
     def test_fill_multiple(self):
         table = [
-            {'ID': 'id1', 'Column1': 'val1', 'Column2': 'val1b'},
-            {'ID': 'id2'},
-            {'ID': 'id3', 'Column1': 'val3', 'Column2': 'val3b'}]
-        new_table = p.fill_with_previous(table, ['Column1', 'Column2'])
+            {'Breaker': '1', 'ID': 'id1', 'Column1': 'val1', 'Column2': 'val1b'},
+            {'Breaker': '1', 'ID': 'id2'},
+            {'Breaker': '3', 'ID': 'id3', 'Column1': 'val3', 'Column2': 'val3b'}]
+        new_table = p.fill_with_previous(table, ['Column1', 'Column2'], 'Breaker')
         expected = [
-            {'ID': 'id1', 'Column1': 'val1', 'Column2': 'val1b'},
-            {'ID': 'id2', 'Column1': 'val1', 'Column2': 'val1b'},
-            {'ID': 'id3', 'Column1': 'val3', 'Column2': 'val3b'}]
+            {'Breaker': '1', 'ID': 'id1', 'Column1': 'val1', 'Column2': 'val1b'},
+            {'Breaker': '1', 'ID': 'id2', 'Column1': 'val1', 'Column2': 'val1b'},
+            {'Breaker': '3', 'ID': 'id3', 'Column1': 'val3', 'Column2': 'val3b'}]
         self.assertEqual(new_table, expected)
 
     def test_dont_override_columns(self):
         table = [
-            {'ID': 'id1', 'Column1': 'val1', 'Column2': 'val1b'},
-            {'ID': 'id2'},
-            {'ID': 'id3', 'Column1': 'val3'},
-            {'ID': 'id4'}]
-        new_table = p.fill_with_previous(table, ['Column1', 'Column2'])
+            {'Breaker': '1', 'ID': 'id1', 'Column1': 'val1', 'Column2': 'val1b'},
+            {'Breaker': '1', 'ID': 'id2'},
+            {'Breaker': '1', 'ID': 'id3', 'Column1': 'val3'},
+            {'Breaker': '1', 'ID': 'id4'}]
+        new_table = p.fill_with_previous(table, ['Column1', 'Column2'], 'Breaker')
         expected = [
-            {'ID': 'id1', 'Column1': 'val1', 'Column2': 'val1b'},
-            {'ID': 'id2', 'Column1': 'val1', 'Column2': 'val1b'},
-            {'ID': 'id3', 'Column1': 'val3'},
-            {'ID': 'id4', 'Column1': 'val3'}]
+            {'Breaker': '1', 'ID': 'id1', 'Column1': 'val1', 'Column2': 'val1b'},
+            {'Breaker': '1', 'ID': 'id2', 'Column1': 'val1', 'Column2': 'val1b'},
+            {'Breaker': '1', 'ID': 'id3', 'Column1': 'val3'},
+            {'Breaker': '1', 'ID': 'id4', 'Column1': 'val3'}]
         self.assertEqual(new_table, expected)
 
 
