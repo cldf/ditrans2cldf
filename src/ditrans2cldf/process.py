@@ -98,8 +98,9 @@ def merge_array_rows(table, primary_key, merge_fields):
     return new_table
 
 
-def _fill_with_previous(table, columns):
+def _fill_with_previous(table, columns, breaker):
     filler = {}
+    new_breaker = None
     for row in table:
         new_filler = {
             col: row[col]
@@ -107,18 +108,22 @@ def _fill_with_previous(table, columns):
             if col in row}
         if new_filler:
             filler = new_filler
+            new_breaker = row[breaker]
+        elif new_breaker != row[breaker]:
+            new_breaker = row[breaker]
+            filler = {}
         else:
             row = dict(itertools.chain(row.items(), filler.items()))
         yield row
 
 
-def fill_with_previous(table, columns):
+def fill_with_previous(table, columns, breaker):
     """Return table in which values for `columns` are filled.
 
     If a value for a column is empty, it is filled using information from the
     previous row.
     """
-    return list(_fill_with_previous(table, columns))
+    return list(_fill_with_previous(table, columns, breaker))
 
 
 def _drop_duplicates(table, columns, id_map=None):
@@ -631,10 +636,12 @@ def make_cldf_tables(raw_data, config):
         examples, 'ID', ['Reference_ID', 'Reference_pages'])
 
     # Fill in some missing fields
-    lvalues = fill_with_previous(lvalues, ['Parameter_ID', 'Code_ID', 'Value'])
+    lvalues = fill_with_previous(
+        lvalues, ['Parameter_ID', 'Code_ID', 'Value'], 'Language_ID')
     lparam_guesser = ParameterGuesser(lcodes)
     lvalues = [lparam_guesser.fixed_row(row) for row in lvalues]
-    cvalues = fill_with_previous(cvalues, ['Parameter_ID', 'Code_ID', 'Value'])
+    cvalues = fill_with_previous(
+        cvalues, ['Parameter_ID', 'Code_ID', 'Value'], 'Construction_ID')
 
     # Process data
 
