@@ -17,10 +17,14 @@ class Dataset(BaseDataset):
 
         >>> self.raw_dir.download(url, fname)
         """
+        csvdir = self.raw_dir / 'csv'
+        csvdir.mkdir(parents=True, exist_ok=True)
         for sheet_path in self.raw_dir.glob('*.xlsx'):
-            self.raw_dir.xlsx2csv(sheet_path.name)
-            self.raw_dir.joinpath(f'{{sheet_path.stem}}.Sheet1.csv').rename(
-                sheet_path.with_suffix('.csv'))
+            tmpfile = csvdir / f'{sheet_path.stem}.Sheet1.csv'
+            outfile = csvdir / f'{sheet_path.stem}.csv'
+            # will write to tmpfile
+            self.raw_dir.xlsx2csv(sheet_path.name, outdir=csvdir)
+            self.raw_dir.joinpath(tmpfile).rename(outfile)
 
     def cmd_makecldf(self, args):
         """
@@ -30,7 +34,7 @@ class Dataset(BaseDataset):
         """
         config = ditrans2cldf.load_config_file(self.etc_dir / 'config.json')
 
-        raw_data = ditrans2cldf.load_csv_data(self.raw_dir)
+        raw_data = ditrans2cldf.load_csv_data(self.raw_dir / 'csv')
 
         cldf_data = ditrans2cldf.make_cldf_tables(raw_data, config)
 
