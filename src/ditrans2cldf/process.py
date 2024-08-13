@@ -1,7 +1,7 @@
 import re
 import sys
-import itertools
 import collections
+from itertools import chain, zip_longest
 
 from cldfbench.catalogs import Glottolog
 import cldfcatalog
@@ -113,7 +113,7 @@ def _fill_with_previous(table, columns, breaker):
             new_breaker = row[breaker]
             filler = {}
         else:
-            row = dict(itertools.chain(row.items(), filler.items()))
+            row = dict(chain(row.items(), filler.items()))
         yield row
 
 
@@ -245,9 +245,10 @@ def drop_unused(table, used_ids, table_name=None):
 
 def _split_field(pair, gloss_fields):
     k, v = pair
-    if k not in gloss_fields:
+    if k in gloss_fields:
+        return k, v.split()
+    else:
         return k, v
-    return k, v.split()
 
 
 def split_glosses(row, gloss_fields):
@@ -258,6 +259,26 @@ def split_glosses(row, gloss_fields):
     return dict(
         _split_field(pair, gloss_fields)
         for pair in row.items())
+
+
+def render_example(example):
+    words = example.get('Analyzed_Word') or []
+    glosses = example.get('Gloss') or []
+    id_width = len(example['ID'])
+    widths = [max(len(w), len(g)) for w, g in zip(words, glosses)]
+    padded_words = [
+        word.ljust(width)
+        for word, width in zip_longest(words, widths, fillvalue=0)]
+    padded_glosses = [
+        gloss.ljust(width)
+        for gloss, width in zip_longest(glosses, widths, fillvalue=0)]
+    return '({})  {}\n{}    {}\n{}    {}'.format(
+        example['ID'],
+        example['Primary_Text'].strip(),
+        ' ' * id_width,
+        '  '.join(padded_words).rstrip(),
+        ' ' * id_width,
+        '  '.join(padded_glosses).rstrip())
 
 
 def warn_about_misaligned_glosses(examples):
@@ -273,6 +294,7 @@ def warn_about_misaligned_glosses(examples):
                 'examples:{}:'.format(example['ID']),
                 'Number of words different from number of glosses',
                 file=sys.stderr)
+            print(render_example(example), file=sys.stderr)
 
 
 class IDUniqueMaker:
@@ -548,7 +570,7 @@ class SourceFixer:
 
         sources = [
             self._fix_single_source(row_id, ref_id, pages)
-            for ref_id, pages in itertools.zip_longest(ref_ids, pages)]
+            for ref_id, pages in zip_longest(ref_ids, pages)]
         sources = list(filter(None, sources))
         new_row = dict(row)
         new_row['Source'] = sources
@@ -771,7 +793,7 @@ def make_cldf_tables(raw_data, config):
 
     languages = drop_unused(
         languages,
-        set(itertools.chain(
+        set(chain(
             (v['Language_ID'] for v in lvalues if v.get('Language_ID')),
             (c['Language_ID'] for c in constructions if c.get('Language_ID')),
             (e['Language_ID'] for e in examples if e.get('Language_ID')))),
@@ -782,7 +804,7 @@ def make_cldf_tables(raw_data, config):
 
     references = drop_unused(
         references,
-        set(itertools.chain(
+        set(chain(
             (remove_page(cite) for row in lvalues for cite in row.get('Source') or ()),
             (remove_page(cite) for row in constructions for cite in row.get('Source') or ()),
             (remove_page(cite) for row in cvalues for cite in row.get('Source') or ()),
