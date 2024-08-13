@@ -216,10 +216,10 @@ class FillEmptyFields(unittest.TestCase):
 
     def test_keep_filling(self):
         table = [
-            {'Breaker': '1' ,'ID': 'id1', 'Column1': 'val1'},
-            {'Breaker': '1' ,'ID': 'id2'},
-            {'Breaker': '1' ,'ID': 'id3'},
-            {'Breaker': '4' ,'ID': 'id4', 'Column1': 'val4'}]
+            {'Breaker': '1', 'ID': 'id1', 'Column1': 'val1'},
+            {'Breaker': '1', 'ID': 'id2'},
+            {'Breaker': '1', 'ID': 'id3'},
+            {'Breaker': '4', 'ID': 'id4', 'Column1': 'val4'}]
         new_table = p.fill_with_previous(table, ['Column1'], 'Breaker')
         expected = [
             {'Breaker': '1', 'ID': 'id1', 'Column1': 'val1'},
@@ -230,10 +230,10 @@ class FillEmptyFields(unittest.TestCase):
 
     def test_stop_when_breaker_changes(self):
         table = [
-            {'Breaker': '1' ,'ID': 'id1', 'Column1': 'val1'},
-            {'Breaker': '1' ,'ID': 'id2'},
-            {'Breaker': '3' ,'ID': 'id3'},
-            {'Breaker': '4' ,'ID': 'id4', 'Column1': 'val4'}]
+            {'Breaker': '1', 'ID': 'id1', 'Column1': 'val1'},
+            {'Breaker': '1', 'ID': 'id2'},
+            {'Breaker': '3', 'ID': 'id3'},
+            {'Breaker': '4', 'ID': 'id4', 'Column1': 'val4'}]
         new_table = p.fill_with_previous(table, ['Column1'], 'Breaker')
         expected = [
             {'Breaker': '1', 'ID': 'id1', 'Column1': 'val1'},
@@ -373,6 +373,7 @@ class EnsureRequiredColumns(unittest.TestCase):
         required_columns = ['Required1', 'Required2']
         result = p.drop_incomplete(rows, required_columns)
         expected = [{'ID': 'id1', 'Required1': 'req1.1', 'Required2': 'req2.1'}]
+        self.assertEqual(result, expected)
 
 
 class SplitGlosses(unittest.TestCase):
