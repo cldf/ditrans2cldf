@@ -1,4 +1,3 @@
-
 Releasing ditrans2cldf
 ======================
 
@@ -14,7 +13,6 @@ flake8 src
 
 - Update the version number, by removing the trailing `.dev0` in:
   - `setup.py`
-  - `src/ditrans2cldf/__init__.py`
 
 - Create the release commit:
 ```shell
@@ -26,14 +24,12 @@ git commit -a -m "release <VERSION>"
 git tag -a v<VERSION> -m"<VERSION> release"
 ```
 
-- Release to PyPI (see https://github.com/di/markdown-description-example/issues/1#issuecomment-374474296):
+- Release to PyPI:
 ```shell
-rm dist/*
-python setup.py sdist
-twine upload dist/*
-rm dist/*
-python setup.py bdist_wheel
-twine upload dist/*
+# requires `pip install build twine`
+test -d ./dist && rm ./dist/*
+python -m build
+twine upload ./dist/*
 ```
 
 - Push to github:
@@ -42,10 +38,8 @@ git push origin
 git push --tags
 ```
 
-- Change version for the next release cycle, i.e. incrementing and adding .dev0
-
+- Increment version number and append `.dev0` to the version number for the new development cycle:
   - `setup.py`
-  - `src/ditrans2cldf/__init__.py`
 
 - Commit/push the version change:
 ```shell
