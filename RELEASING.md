@@ -27,7 +27,7 @@ git tag -a v<VERSION> -m"<VERSION> release"
 - Release to PyPI:
 ```shell
 # requires `pip install build twine`
-test -d ./dist && rm ./dist/*
+test -d ./dist/ && rm -r ./dist/
 python -m build
 twine upload ./dist/*
 ```
