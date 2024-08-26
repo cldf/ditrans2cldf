@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ditrans2cldf"
-version = "1.1.dev0"
+version = "1.0.1"
 requires-python = ">= 3.8"
 dependencies = [
     "cldfbench[glottolog]",
@@ -30,7 +30,7 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/cldf/ditrans2cldf"
+Repository = "https://github.com/cldf/ditrans2cldf"
 Issues = "https://github.com/cldf/ditrans2cldf/issues"
 
 [project.optional-dependencies]
