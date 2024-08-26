@@ -12,7 +12,7 @@ flake8 src
 ```
 
 - Update the version number, by removing the trailing `.dev0` in:
-  - `setup.py`
+  - `pyproject.toml`
 
 - Create the release commit:
 ```shell
@@ -39,7 +39,7 @@ git push --tags
 ```
 
 - Increment version number and append `.dev0` to the version number for the new development cycle:
-  - `setup.py`
+  - `pyproject.toml`
 
 - Commit/push the version change:
 ```shell
