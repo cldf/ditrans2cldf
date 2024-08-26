@@ -1,9 +1,11 @@
 .coverage
 .tox
 *.py[co]
-__pycache__
+__pycache__/
 ditrans2cldf.egg-info
 .idea/
+build/
+dist/
 
 # latex documentation
 *.aux
