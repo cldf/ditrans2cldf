@@ -17,16 +17,15 @@ authors = [
 ]
 description = "Small library for converting Ditransitive-style Filemaker databases to CLDF"
 readme = "README.md"
-license = { file = "LICENSE" }
 keywords = ["data", "linguistics"]
 classifiers = [
-    "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: Apache Software License",
 ]
 
 [project.urls]
