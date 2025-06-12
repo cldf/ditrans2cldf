@@ -1,8 +1,8 @@
 import re
 import sys
 
-from pybtex.database.input.bibtex import Entry as BibEntry
-from pybtex.database import (
+from simplepybtex.database.input.bibtex import Entry as BibEntry
+from simplepybtex.database import (
     Person as BibPerson, BibliographyData, InvalidNameString
 )
 

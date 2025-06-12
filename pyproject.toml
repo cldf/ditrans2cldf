@@ -9,7 +9,7 @@ requires-python = ">= 3.8"
 dependencies = [
     "cldfbench[glottolog]",
     "openpyxl",
-    "pybtex",
+    "simplepybtex",
     "unidecode",
 ]
 authors = [
