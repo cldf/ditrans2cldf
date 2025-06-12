@@ -3,7 +3,7 @@ import sys
 
 from simplepybtex.database.input.bibtex import Entry as BibEntry
 from simplepybtex.database import (
-    Person as BibPerson, BibliographyData, InvalidNameString
+    Person as BibPerson, BibliographyData, InvalidNameString,
 )
 
 from unidecode import unidecode
@@ -36,7 +36,7 @@ def parse_people(people_string):
         bib_people = [BibPerson(string=s) for s in people_list]
     except InvalidNameString as e:
         msg = 'Could not parse authors/editors: {}'.format(str(e))
-        raise ValueError(msg)
+        raise ValueError(msg) from e
     return bib_people
 
 

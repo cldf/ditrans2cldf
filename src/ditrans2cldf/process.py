@@ -25,7 +25,7 @@ def extract_table(original_table, primary_key, columns):
         new_row = {
             k: v for k, v in orig_row.items()
             if k == primary_key or k in columns}
-        # TODO Check for conflicting rows
+        # TODO(johannes): Check for conflicting rows
         if id_ not in new_table:
             new_table[id_] = new_row
     return list(new_table.values())
@@ -162,7 +162,7 @@ def remove_invalid_iso_codes(row):
 
     Invalid values are dropped.
     """
-    # TODO Warn about dropped fields
+    # TODO(johannes): Warn about dropped fields
     isocode = row.get('ISO639P3code', '')
     if re.fullmatch(r'[a-z]{3}', isocode):
         return row
@@ -338,7 +338,7 @@ class SequentialIDMaker:
         self._prefix = prefix or ''
         self._last_id = 0
 
-    def make_id(self, row):
+    def make_id(self, _row):
         """Return a unique primary key for `row`.
 
         The key is composed of a prefix and a sequential number.
@@ -493,13 +493,13 @@ def fix_foreign_keys(table, key_column, foreign_id_map, table_name=None):
     return new_table
 
 
-# TODO move to proper place
-# FIXME also, unlike all other functions here this is mutating the table
+# TODO(johannes): move to proper place
+# FIXME(johannes): also, unlike all other functions here this is mutating the table
 def add_ids(id_maker, table):
     id_map = {}
     for row in table:
         new_id = id_maker.make_id(row)
-        # XXX Check for collisions among old IDs?
+        # XXX(johannes): Check for collisions among old IDs?
         # Technically this should never happen, because FileMaker should keep
         # its own data valid, but you never know...
         if (old_id := row.get('ID')):
@@ -508,7 +508,7 @@ def add_ids(id_maker, table):
     return id_map
 
 
-# TODO move to proper place
+# TODO(johannes): move to proper place
 def add_bibkeys(reference_table):
     bibkey_map = {}
     bibkeys = set()
@@ -528,7 +528,7 @@ def add_bibkeys(reference_table):
 
         bibkey_map[str(old_id)] = bibkey
 
-        # TODO Warn about potential duplicates
+        # TODO(johannes): Warn about potential duplicates
         if bibkey not in bibkeys:
             new_row = dict(row)
             new_row['ID'] = bibkey
@@ -539,7 +539,7 @@ def add_bibkeys(reference_table):
     return new_table, bibkey_map
 
 
-# TODO move to proper place
+# TODO(johannes): move to proper place
 class SourceFixer:
 
     def __init__(self, bibkey_map):
@@ -591,7 +591,7 @@ def fix_sources(table, bibkey_map, table_name=None):
 
 
 def make_cldf_tables(raw_data, config):
-    # TODO Account for missing tables
+    # TODO(johannes): Account for missing tables
     lcodes = extract_table(
         raw_data['Language_data'],
         'Language_parameter_value_name_ID',
@@ -670,7 +670,7 @@ def make_cldf_tables(raw_data, config):
     languages = list(map(remove_invalid_iso_codes, languages))
 
     try:
-        # FIXME move the whole Glottolog stuff to somewhere sane
+        # FIXME(johannes): move the whole Glottolog stuff to somewhere sane
         catconf = cldfcatalog.Config.from_file()
         glottolog_path = catconf.get_clone('glottolog')
         glottolog_api = Glottolog(glottolog_path).api
@@ -710,7 +710,7 @@ def make_cldf_tables(raw_data, config):
     old_size = len(references)
     references, bibkey_map = add_bibkeys(references)
     if len(references) != old_size:
-        # TODO Actually print out *which* rows are potential duplicates
+        # TODO(johannes): Actually print out *which* rows are potential duplicates
         print(
             'dropped', old_size - len(references), 'out of', old_size,
             'references for being potential duplicates',

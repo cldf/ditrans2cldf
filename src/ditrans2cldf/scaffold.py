@@ -95,7 +95,7 @@ def add_custom_columns(dataset, config):
     if 'custom_columns' not in config:
         return
     for table_name, columns in config['custom_columns'].items():
-        # TODO check if table actuallyexists
+        # TODO(johannes): check if table actuallyexists
         # if table_name not in dataset.tables:
         #     continue
         for column in columns:
@@ -107,5 +107,5 @@ def add_custom_columns(dataset, config):
                 msg = str(error)
                 if not msg.startswith('Duplicate column name:'):
                     print(
-                        '%s: couldn not add column: %s' % (table_name, msg),
+                        f"{table_name}: couldn't add column: {msg}",
                         file=sys.stderr)

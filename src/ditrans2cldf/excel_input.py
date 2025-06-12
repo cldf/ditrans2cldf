@@ -5,10 +5,10 @@ from openpyxl import load_workbook
 
 
 def _dictionarise(column_names, row):
-    return dict(
-        (name, str(cell.value))
+    return {
+        name: str(cell.value)
         for name, cell in zip(column_names, row)
-        if name and cell.value)
+        if name and cell.value}
 
 
 def _normalise_cell(cell):
@@ -64,7 +64,6 @@ def load_excel_data(folder):  # pragma: nocover
             continue
         table_name = filename.stem
         data[table_name] = sheet_to_list(workbook[workbook.sheetnames[0]])
-    data = {
+    return {
         table_name: list(map(normalise_whitespace, table))
         for table_name, table in data.items()}
-    return data

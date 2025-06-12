@@ -3,8 +3,8 @@ import itertools
 import collections
 
 
-# TODO Remove redundant fields
-# TODO Use urls in column fields
+# TODO(johannes): Remove redundant fields
+# TODO(johannes): Use urls in column fields
 DEFAULT_CONFIG = {
 
     'custom_columns': {
@@ -24,7 +24,7 @@ DEFAULT_CONFIG = {
         'ExampleTable': [
             'ID', 'Language_ID', 'Primary_Text', 'Original_Orthography',
             'Translated_Text', 'Translation_Other', 'Analyzed_Text', 'Gloss',
-            'Type', 'Comment']
+            'Type', 'Comment'],
     },
 
     'colname_maps': {
@@ -81,8 +81,8 @@ DEFAULT_CONFIG = {
             'Translation': 'Translated_Text',
             'Translation_other': 'Translation_Other',
             'Example_type': 'Type',
-            'Comments': 'Comment'
-        }
+            'Comments': 'Comment',
+        },
     },
 
     'required_columns': {
@@ -91,7 +91,7 @@ DEFAULT_CONFIG = {
         'constructions': ['Language_ID'],
         'ccodes': ['Parameter_ID'],
         'cvalues': ['Construction_ID', 'Parameter_ID', 'Code_ID'],
-        'examples': ['Primary_Text', 'Language_ID']
+        'examples': ['Primary_Text', 'Language_ID'],
     },
 
     'bibtex_map': {
@@ -111,11 +111,11 @@ DEFAULT_CONFIG = {
         'Series_title': 'series',
         'URL': 'url',
         'Volume': 'volume',
-        'Year': 'year'
+        'Year': 'year',
     },
 
-    # XXX does this do anything yet?
-    'tables_with_sources': ['ValueTable', 'ExampleTable', 'cvalues.csv']
+    # XXX(johannes): does this do anything yet?
+    'tables_with_sources': ['ValueTable', 'ExampleTable', 'cvalues.csv'],
 }
 
 
