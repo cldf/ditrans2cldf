@@ -24,9 +24,16 @@ git commit -a -m "release <VERSION>"
 git tag -a v<VERSION> -m"<VERSION> release"
 ```
 
+- Make sure [build][build] and [twine][twine] are installed
+```shell
+pip install build twine
+```
+
+[build]: https://pypi.org/project/build/
+[twine]: https://pypi.org/project/twine/
+
 - Release to PyPI:
 ```shell
-# requires `pip install build twine`
 test -d ./dist/ && rm -r ./dist/
 python -m build
 twine upload ./dist/*
